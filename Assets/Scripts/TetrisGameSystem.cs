@@ -1,15 +1,95 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//Developer: Claudio Alberto
+//Tetris Game System make in unity
+
+
 public class TetrisGameSystem : MonoBehaviour {
 
-	// Use this for initialization
-	void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
+    int[,] gameScreen; //Tela do Jogo
+    public int height; //Altura da tela
+    public int width; //Largura da Tela do Jogo
+    GameObject[,] blocks; //matris para criação dos blocos
+    public GameObject blockModel; //Prefab do Bloco Modelo
+    public float timeIntervalToMoveBlockToDown; //intervalo de tempo para descer os blocos
+    public float timeIntervalToMoveBlockToDownMax; //limite de tempo para o intervalo de tempo
+    void Start()
+    {
+        gameScreen = new int[width, height];
+        blocks = new GameObject[width, height];
+        DrawScreen();
+    }
+    //Desenha os blocos na tela 
+    void DrawScreen()
+    {
+        int i, j;
+        for (i=0; i < height; i++)
+        {
+            for (j=0; j < width; j++)
+            {
+                gameScreen[j, i] = -1;
+                blocks[j, i] = Instantiate(blockModel, new Vector2(j+(j*0.1f), i+(i*0.1f)), Quaternion.identity) as GameObject;
+            }
+        }
+        gameScreen[5, 10] = 1;
+        gameScreen[5, 11] = 1;
+        gameScreen[4, 10] = 1;
+        gameScreen[6, 10] = 1;
+    }
+    //Colore os blocks da Tela
+    void SetColorInBlocks()
+    {
+        int i, j;
+        for (i = 0; i < height; i++)
+        {
+            for (j = 0; j < width; j++)
+            {
+                if (gameScreen[j, i] == -1)
+                    blocks[j, i].gameObject.GetComponent<Renderer>().material.color = Color.gray;
+                if (gameScreen[j, i] == 0)
+                    blocks[j, i].gameObject.GetComponent<Renderer>().material.color = Color.white;
+                if (gameScreen[j, i] == 1)
+                    blocks[j, i].gameObject.GetComponent<Renderer>().material.color = Color.blue;
+            }
+        }
+    }
+    //Faz os blocos descerem
+    void MoveBlockToDown()
+    {
+        int i, j;
+        for(i=0; i < height; i++)
+        {
+            for(j = 0; j < width; j++)
+            {
+                if (gameScreen[j, i] == 1)
+                {
+                    if (i > 0)
+                    {
+                        if (gameScreen[j, i - 1] == -1)
+                        {
+                            gameScreen[j, i] = -1;
+                            gameScreen[j, i - 1] = 1;
+                        }
+                        else
+                            gameScreen[j, i] = 0;
+                    }
+                    else
+                        gameScreen[j, i] = 0;
+                }
+            }
+        }
+    }
+
+
+    void Update()
+    {
+        timeIntervalToMoveBlockToDown += Time.deltaTime;
+        if(timeIntervalToMoveBlockToDown > timeIntervalToMoveBlockToDownMax)
+        {
+            MoveBlockToDown();
+            timeIntervalToMoveBlockToDown = 0;
+        }
+        SetColorInBlocks();
+    }
 }
